@@ -1,8 +1,8 @@
-import './Layout.css';
+import classes from './Layout.module.css';
 
-const Layout = ({ children, className = '' }) => {
+const Layout = ({ children }) => {
   return (
-    <div className={`Layout ${className}`.trim()}>
+    <div className={classes.Layout}>
       <main>
         {children}
       </main>
