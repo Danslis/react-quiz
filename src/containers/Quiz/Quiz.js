@@ -4,6 +4,7 @@ import ActiveQuiz from '../../components/ActiveQuiz/ActiveQuiz';
 import FinishedQuiz from '../../components/FinishedQuiz/FinishedQuiz';
 
 const Quiz = () => {
+  const [results, setResults] = useState({});
   const [isFinished, setIsFinished] = useState(false);
   const [activeQuestion, setActiveQuestion] = useState(0);
   const [answerState, setAnswerState] = useState(null);
@@ -36,6 +37,13 @@ const Quiz = () => {
     return activeQuestion + 1 === quiz.length;
   };
 
+  const retryHandler = () => {
+    setActiveQuestion(0);
+    setAnswerState(null);
+    setIsFinished(false);
+    setResults({});
+  };
+
   const onAnswerClickHandler = (answerId) => {
     if (answerState) {
       const key = Object.keys(answerState)[0];
@@ -45,9 +53,15 @@ const Quiz = () => {
     }
 
     const question = quiz[activeQuestion];
+    const newResults = { ...results };
 
     if (question.rightAnswerId === answerId) {
+      if (!newResults[question.id]) {
+        newResults[question.id] = 'success';
+      }
+
       setAnswerState({ [answerId]: 'success' });
+      setResults(newResults);
 
       const timeout = setTimeout(() => {
         if (isQuizFinished()) {
@@ -59,7 +73,9 @@ const Quiz = () => {
         clearTimeout(timeout);
       }, 1000);
     } else {
+      newResults[question.id] = 'error';
       setAnswerState({ [answerId]: 'error' });
+      setResults(newResults);
     }
   };
 
@@ -69,7 +85,11 @@ const Quiz = () => {
         <h1>Ответьте на все вопросы</h1>
 
         {isFinished ? (
-          <FinishedQuiz />
+          <FinishedQuiz
+            results={results}
+            quiz={quiz}
+            onRetry={retryHandler}
+          />
         ) : (
           <ActiveQuiz
             answers={quiz[activeQuestion].answers}
