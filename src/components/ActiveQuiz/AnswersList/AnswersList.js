@@ -2,7 +2,7 @@ import React from 'react';
 import classes from './AnswersList.module.css';
 import AnswerItem from './AnswerItem/AnswerItem';
 
-const AnswersList = ({ answers, onAnswerClick }) => {
+const AnswersList = ({ answers, onAnswerClick, state }) => {
   return (
     <ul className={classes.AnswersList}>
       {answers.map((answer, index) => (
@@ -10,6 +10,7 @@ const AnswersList = ({ answers, onAnswerClick }) => {
           key={index}
           answer={answer}
           onAnswerClick={onAnswerClick}
+          state={state ? state[answer.id] : null}
         />
       ))}
     </ul>

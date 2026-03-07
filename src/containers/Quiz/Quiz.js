@@ -4,6 +4,7 @@ import ActiveQuiz from '../../components/ActiveQuiz/ActiveQuiz';
 
 const Quiz = () => {
   const [activeQuestion, setActiveQuestion] = useState(0);
+  const [answerState, setAnswerState] = useState(null);
   const [quiz] = useState([
     {
       question: 'Какого цвета небо?',
@@ -29,10 +30,28 @@ const Quiz = () => {
     }
   ]);
 
+  const isQuizFinished = () => {
+    return activeQuestion + 1 === quiz.length;
+  };
+
   const onAnswerClickHandler = (answerId) => {
-    console.log('Answer Id: ', answerId);
-    
-    setActiveQuestion(activeQuestion + 1);
+    const question = quiz[activeQuestion];
+
+    if (question.rightAnswerId === answerId) {
+      setAnswerState({ [answerId]: 'success' });
+
+      const timeout = setTimeout(() => {
+        if (isQuizFinished()) {
+          console.log('Finished');
+        } else {
+          setActiveQuestion(activeQuestion + 1);
+          setAnswerState(null);
+        }
+        clearTimeout(timeout);
+      }, 1000);
+    } else {
+      setAnswerState({ [answerId]: 'error' });
+    }
   };
 
   return (
@@ -46,6 +65,7 @@ const Quiz = () => {
           onAnswerClick={onAnswerClickHandler}
           quizLength={quiz.length}
           answerNumber={activeQuestion + 1}
+          state={answerState}
         />
       </div>
     </div>
