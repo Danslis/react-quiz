@@ -1,10 +1,13 @@
 import React from 'react';
 import classes from './AnswerItem.module.css';
 
-const AnswerItem = props => {
+const AnswerItem = ({ answer, onAnswerClick }) => {
   return (
-    <li className={classes.AnswerItem}>
-      {props.answer.text}
+    <li
+      className={classes.AnswerItem}
+      onClick={() => onAnswerClick(answer.id)}
+    >
+      {answer.text}
     </li>
   );
 };

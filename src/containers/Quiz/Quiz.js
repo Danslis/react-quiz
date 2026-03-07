@@ -5,14 +5,20 @@ import ActiveQuiz from '../../components/ActiveQuiz/ActiveQuiz';
 const Quiz = () => {
   const [quiz] = useState([
     {
+      question: 'Какого цвета небо?',
+      rightAnswerId: 2,
       answers: [
-        { text: 'Вопрос 1' },
-        { text: 'Вопрос 2' },
-        { text: 'Вопрос 3' },
-        { text: 'Вопрос 4' }
+        { text: 'Черный', id: 1 },
+        { text: 'Синий', id: 2 },
+        { text: 'Красный', id: 3 },
+        { text: 'Зеленый', id: 4 }
       ]
     }
   ]);
+
+  const onAnswerClickHandler = (answerId) => {
+    console.log('Answer Id: ', answerId);
+  };
 
   return (
     <div className={classes.Quiz}>
@@ -21,6 +27,10 @@ const Quiz = () => {
 
         <ActiveQuiz
           answers={quiz[0].answers}
+          question={quiz[0].question}
+          onAnswerClick={onAnswerClickHandler}
+          questionNumber={1}
+          totalQuestions={quiz.length}
         />
       </div>
     </div>
