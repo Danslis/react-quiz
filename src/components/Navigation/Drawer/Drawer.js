@@ -1,27 +1,54 @@
-import classes from './Drawer.module.css';
-import Backdrop from '../../UI/Backdrop/Backdrop';
+import React, {Component} from 'react'
+import classes from './Drawer.module.css' // обратите внимание на .module.css
+import {NavLink} from 'react-router-dom'
+import Backdrop from '../../UI/Backdrop/Backdrop'
 
-const links = [1, 2, 3];
+const links = [
+  {to: '/', label: 'Список'},
+  {to: '/auth', label: 'Авторизация'},
+  {to: '/quiz-creator', label: 'Создать тест'}
+]
 
-const Drawer = ({ isOpen, onClose }) => {
-  const renderLinks = () => links.map((link, index) => (
-    <li key={index}>
-      <a href="/">{link}</a>
-    </li>
-  ));
+class Drawer extends Component {
 
-  const cls = [classes.Drawer];
-  
-  if (!isOpen) cls.push(classes.close);
+  clickHandler = () => {
+    this.props.onClose()
+  }
 
-  return (
-    <>
-      <nav className={cls.join(' ')}>
-        <ul>{renderLinks()}</ul>
-      </nav>
-      {isOpen && <Backdrop onClick={onClose} />}
-    </>
-  );
-};
+  renderLinks() {
+    return links.map((link, index) => {
+      return (
+        <li key={index}>
+          <NavLink
+            to={link.to}
+            className={({ isActive }) => isActive ? classes.active : null} // новый способ для v6
+            onClick={this.clickHandler}
+          >
+            {link.label}
+          </NavLink>
+        </li>
+      )
+    })
+  }
 
-export default Drawer;
+  render() {
+    const cls = [classes.Drawer]
+
+    if (!this.props.isOpen) {
+      cls.push(classes.close)
+    }
+
+    return (
+      <>
+        <nav className={cls.join(' ')}>
+          <ul>
+            { this.renderLinks() }
+          </ul>
+        </nav>
+        { this.props.isOpen ? <Backdrop onClick={this.props.onClose} /> : null }
+      </>
+    )
+  }
+}
+
+export default Drawer
