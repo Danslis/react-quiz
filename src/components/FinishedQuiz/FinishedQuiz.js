@@ -1,43 +1,52 @@
-import React from 'react';
-import classes from './FinishedQuiz.module.css';
-import Button from '../UI/Button/Button';
+import React from 'react'
+import classes from './FinishedQuiz.module.css'
+import Button from '../UI/Button/Button'
+import { Link } from 'react-router-dom'
 
-const FinishedQuiz = ({ results, quiz, onRetry }) => {
-  const successCount = Object.keys(results).reduce((total, key) => {
-    if (results[key] === 'success') {
-      total++;
+const FinishedQuiz = props => {  
+  if (!props.results) {
+    return null
+  }
+
+  const successCount = Object.keys(props.results).reduce((total, key) => {
+    if (props.results[key] === 'success') {
+      total++
     }
-    return total;
-  }, 0);
+    return total
+  }, 0)
 
   return (
     <div className={classes.FinishedQuiz}>
       <ul>
-        {quiz.map((quizItem, index) => {
+        {props.quiz.map((quizItem, index) => {         
+          const result = props.results[quizItem.id]
+          
           const cls = [
             'fa',
-            results[quizItem.id] === 'error' ? 'fa-times' : 'fa-check',
-            classes[results[quizItem.id]]
-          ];
+            result === 'error' ? 'fa-times' : 'fa-check',
+            result ? classes[result] : ''
+          ]
 
           return (
             <li key={index}>
-              <strong>{index + 1}.</strong>&nbsp;
+              <strong>{index + 1}</strong>.&nbsp;
               {quizItem.question}
               <i className={cls.join(' ')} />
             </li>
-          );
+          )
         })}
       </ul>
 
-      <p>Правильно {successCount} из {quiz.length}</p>
+      <p>Правильно {successCount} из {props.quiz.length}</p>
 
       <div>
-        <Button onClick={onRetry} type="primary">Повторить</Button>
-        <Button type="success">Перейти в список тестов</Button>
+        <Button onClick={props.onRetry} type="primary">Повторить</Button>
+        <Link to="/">
+          <Button type="success">Перейти в список тестов</Button>
+        </Link>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default FinishedQuiz;
+export default FinishedQuiz
