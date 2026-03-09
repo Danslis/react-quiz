@@ -5,6 +5,7 @@ import Input from '../../components/UI/Input/Input'
 import is from 'is_js'
 
 const Auth = () => {
+  const [isFormValid, setIsFormValid] = useState(false)
   const [formControls, setFormControls] = useState({
     email: {
       value: '',
@@ -76,7 +77,13 @@ const Auth = () => {
 
     updatedControls[controlName] = control
 
+    let isFormValid = true
+    Object.keys(updatedControls).forEach(name => {
+      isFormValid = updatedControls[name].valid && isFormValid
+    })
+
     setFormControls(updatedControls)
+    setIsFormValid(isFormValid)
   }
 
   const renderInputs = () => {
@@ -106,11 +113,19 @@ const Auth = () => {
         <form onSubmit={submitHandler} className={classes.AuthForm}>
           {renderInputs()}
 
-          <Button type="success" onClick={loginHandler}>
+          <Button
+            type="success"
+            onClick={loginHandler}
+            disabled={!isFormValid}
+          >
             Войти
           </Button>
 
-          <Button type="primary" onClick={registerHandler}>
+          <Button
+            type="primary"
+            onClick={registerHandler}
+            disabled={!isFormValid}
+          >
             Зарегистрироваться
           </Button>
         </form>
