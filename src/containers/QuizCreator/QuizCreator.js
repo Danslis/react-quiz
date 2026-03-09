@@ -2,7 +2,8 @@ import React, { useState } from 'react'
 import classes from './QuizCreator.module.css'
 import Button from '../../components/UI/Button/Button'
 import Input from '../../components/UI/Input/Input'
-import { createControl } from '../../form/formFramework'
+import Select from '../../components/UI/Select/Select'
+import { createControl, validate, validateForm } from '../../form/formFramework'
 
 const createOptionControl = (number) => {
   return createControl({
@@ -27,13 +28,16 @@ const createFormControls = () => {
 
 const QuizCreator = () => {
   const [quiz, setQuiz] = useState([])
+  const [isFormValid, setIsFormValid] = useState(false)
+  const [rightAnswerId, setRightAnswerId] = useState(1)
   const [formControls, setFormControls] = useState(createFormControls())
 
   const submitHandler = event => {
     event.preventDefault()
   }
 
-  const addQuestionHandler = () => {
+  const addQuestionHandler = event => {
+    event.preventDefault()
     console.log('Add question')
   }
 
@@ -42,7 +46,21 @@ const QuizCreator = () => {
   }
 
   const changeHandler = (value, controlName) => {
-    console.log(value, controlName)
+    const updatedControls = { ...formControls }
+    const control = { ...updatedControls[controlName] }
+
+    control.touched = true
+    control.value = value
+    control.valid = validate(control.value, control.validation)
+
+    updatedControls[controlName] = control
+
+    setFormControls(updatedControls)
+    setIsFormValid(validateForm(updatedControls))
+  }
+
+  const selectChangeHandler = event => {
+    setRightAnswerId(+event.target.value)
   }
 
   const renderControls = () => {
@@ -66,6 +84,20 @@ const QuizCreator = () => {
     })
   }
 
+  const select = (
+    <Select
+      label="Выберите правильный ответ"
+      value={rightAnswerId}
+      onChange={selectChangeHandler}
+      options={[
+        { text: 1, value: 1 },
+        { text: 2, value: 2 },
+        { text: 3, value: 3 },
+        { text: 4, value: 4 }
+      ]}
+    />
+  )
+
   return (
     <div className={classes.QuizCreator}>
       <div>
@@ -73,19 +105,21 @@ const QuizCreator = () => {
 
         <form onSubmit={submitHandler}>
           {renderControls()}
+          {select}
 
-          <select>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-          </select>
-
-          <Button type="primary" onClick={addQuestionHandler}>
+          <Button
+            type="primary"
+            onClick={addQuestionHandler}
+            disabled={!isFormValid}
+          >
             Добавить вопрос
           </Button>
 
-          <Button type="success" onClick={createQuizHandler}>
+          <Button
+            type="success"
+            onClick={createQuizHandler}
+            disabled={quiz.length === 0}
+          >
             Создать тест
           </Button>
         </form>
