@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import classes from './Auth.module.css'
 import Button from '../../components/UI/Button/Button'
+import Input from '../../components/UI/Input/Input'
 
 const Auth = () => {
   const [email, setEmail] = useState('')
@@ -24,17 +25,17 @@ const Auth = () => {
         <h1>Авторизация</h1>
 
         <form onSubmit={submitHandler} className={classes.AuthForm}>
-          <input 
-            type="email" 
-            placeholder="Email"
+          <Input
+            label="Email"
             value={email}
             onChange={e => setEmail(e.target.value)}
           />
-          <input 
-            type="password" 
-            placeholder="Пароль"
+
+          <Input
+            label="Пароль"
             value={password}
             onChange={e => setPassword(e.target.value)}
+            errorMessage="TEST"
           />
 
           <Button type="success" onClick={loginHandler}>
