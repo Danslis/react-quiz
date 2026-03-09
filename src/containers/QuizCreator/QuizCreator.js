@@ -38,11 +38,36 @@ const QuizCreator = () => {
 
   const addQuestionHandler = event => {
     event.preventDefault()
-    console.log('Add question')
+
+    const updatedQuiz = [...quiz]
+    const index = updatedQuiz.length + 1
+
+    const { question, option1, option2, option3, option4 } = formControls
+
+    const questionItem = {
+      question: question.value,
+      id: index,
+      rightAnswerId: rightAnswerId,
+      answers: [
+        { text: option1.value, id: option1.id },
+        { text: option2.value, id: option2.id },
+        { text: option3.value, id: option3.id },
+        { text: option4.value, id: option4.id }
+      ]
+    }
+
+    updatedQuiz.push(questionItem)
+
+    setQuiz(updatedQuiz)
+    setIsFormValid(false)
+    setRightAnswerId(1)
+    setFormControls(createFormControls())
   }
 
-  const createQuizHandler = () => {
-    console.log('Create quiz')
+  const createQuizHandler = event => {
+    event.preventDefault()
+    console.log(quiz)
+    // TODO: Server
   }
 
   const changeHandler = (value, controlName) => {
