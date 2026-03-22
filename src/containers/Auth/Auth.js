@@ -1,8 +1,9 @@
-import React, { useState } from 'react'
+import React, { useState, useCallback } from 'react';
 import classes from './Auth.module.css'
 import Button from '../../components/UI/Button/Button'
 import Input from '../../components/UI/Input/Input'
 import is from 'is_js'
+import axios from 'axios';
 
 const Auth = () => {
   const [isFormValid, setIsFormValid] = useState(false)
@@ -33,13 +34,39 @@ const Auth = () => {
     }
   })
 
-  const loginHandler = () => {
-    console.log('Login')
-  }
+  const loginHandler = useCallback(async () => {
+    const authData = {
+      email: formControls.email.value,
+      password: formControls.password.value,
+      returnSecureToken: true
+    };
+    try {
+      const response = await axios.post(
+        'https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=',
+        authData
+      );
+      console.log(response.data);
+    } catch (e) {
+      console.log(e);
+    }
+  }, [formControls.email.value, formControls.password.value]);
 
-  const registerHandler = () => {
-    console.log('Register')
-  }
+  const registerHandler = useCallback(async () => {
+    const authData = {
+      email: formControls.email.value,
+      password: formControls.password.value,
+      returnSecureToken: true
+    };
+    try {
+      const response = await axios.post(
+        'https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser?key=',
+        authData
+      );
+      console.log(response.data);
+    } catch (e) {
+      console.log(e);
+    }
+  }, [formControls.email.value, formControls.password.value]);
 
   const submitHandler = event => {
     event.preventDefault()
