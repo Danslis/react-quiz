@@ -2,14 +2,17 @@ import React, { useEffect, useState } from 'react'
 import classes from './QuizList.module.css'
 import {NavLink} from 'react-router-dom'
 import axios from 'axios'
+import Loader from '../../components/UI/Loader/Loader'
 
 const QuizList = () => {
   const [quizes, setQuizes] = useState([])
+  const [loading, setLoading] = useState(true)
   const [setError] = useState(null)
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true)
         const response = await axios.get('https://react-quiz-a964c-default-rtdb.firebaseio.com/quiz.json')
 
         const quizesArray = []
@@ -27,6 +30,8 @@ const QuizList = () => {
       } catch (e) {
         console.log(e)
         setError('Ошибка загрузки тестов')
+      } finally {
+        setLoading(false)
       }
     }
 
@@ -51,9 +56,13 @@ const QuizList = () => {
     <div className={classes.QuizList}>
       <div>
         <h1>Список тестов</h1>
-        <ul>
-          {renderQuizes()}
-        </ul>
+        {
+          loading
+            ? <Loader />
+            : <ul>
+                { renderQuizes() }
+              </ul>
+        }
       </div>
     </div>
   )
