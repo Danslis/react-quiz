@@ -1,27 +1,50 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import classes from './QuizList.module.css'
 import {NavLink} from 'react-router-dom'
 import axios from 'axios'
 
 const QuizList = () => {
+  const [quizes, setQuizes] = useState([])
+  const [setError] = useState(null)
+
   useEffect(() => {
-    axios.get('https://react-quiz-a964c-default-rtdb.firebaseio.com/quiz.json')
-      .then(response => {
-        console.log(response)
-      })
-  }, [])
+    const fetchData = async () => {
+      try {
+        const response = await axios.get('https://react-quiz-a964c-default-rtdb.firebaseio.com/quiz.json')
+
+        const quizesArray = []
+
+        if (response.data) {
+          Object.keys(response.data).forEach((key, index) => {
+            quizesArray.push({
+              id: key,
+              name: `Тест №${index + 1}`
+            })
+          })
+        }
+
+        setQuizes(quizesArray)       
+      } catch (e) {
+        console.log(e)
+        setError('Ошибка загрузки тестов')
+      }
+    }
+
+    fetchData()
+  }, [setError])   
 
   const renderQuizes = () => {
-    return [1, 2, 3].map((quiz, index) => (
-      <li key={index}>
-        <NavLink 
-          to={`/quiz/${quiz}`}
-          className={({ isActive }) => isActive ? classes.active : null}
+    return quizes.map(quiz => {
+      return (
+        <li
+          key={quiz.id}
         >
-          Тест {quiz}
-        </NavLink>
-      </li>
-    ))
+          <NavLink to={'/quiz/' + quiz.id}>
+            {quiz.name}
+          </NavLink>
+        </li>
+      )
+    })
   }
 
   return (
