@@ -1,71 +1,41 @@
-import React, { useEffect, useState } from 'react'
-import classes from './QuizList.module.css'
-import {NavLink} from 'react-router-dom'
-import axios from '../../axios/axios-quiz'
-import Loader from '../../components/UI/Loader/Loader'
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { NavLink } from 'react-router-dom';
+import classes from './QuizList.module.css';
+import Loader from '../../components/UI/Loader/Loader';
+import { fetchQuizes } from '../../store/actions/quiz';
 
 const QuizList = () => {
-  const [quizes, setQuizes] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [setError] = useState(null)
+  const dispatch = useDispatch();
+  const quizes = useSelector(state => state.quiz.quizes);
+  const loading = useSelector(state => state.quiz.loading);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true)
-        const response = await axios.get('/quiz.json')
-
-        const quizesArray = []
-
-        if (response.data) {
-          Object.keys(response.data).forEach((key, index) => {
-            quizesArray.push({
-              id: key,
-              name: `Тест №${index + 1}`
-            })
-          })
-        }
-
-        setQuizes(quizesArray)       
-      } catch (e) {
-        console.log(e)
-        setError('Ошибка загрузки тестов')
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchData()
-  }, [setError])   
+    dispatch(fetchQuizes());
+  }, [dispatch]);
 
   const renderQuizes = () => {
-    return quizes.map(quiz => {
-      return (
-        <li
-          key={quiz.id}
-        >
-          <NavLink to={'/quiz/' + quiz.id}>
-            {quiz.name}
-          </NavLink>
-        </li>
-      )
-    })
-  }
+    return quizes.map(quiz => (
+      <li key={quiz.id}>
+        <NavLink to={'/quiz/' + quiz.id}>
+          {quiz.name}
+        </NavLink>
+      </li>
+    ));
+  };
 
   return (
     <div className={classes.QuizList}>
       <div>
         <h1>Список тестов</h1>
-        {
-          loading
-            ? <Loader />
-            : <ul>
-                { renderQuizes() }
-              </ul>
-        }
+        {loading && quizes.length === 0 ? (
+          <Loader />
+        ) : (
+          <ul>{renderQuizes()}</ul>
+        )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default QuizList
+export default QuizList;
