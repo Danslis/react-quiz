@@ -5,7 +5,7 @@ export function fetchQuizes() {
   return async dispatch => {
     dispatch(fetchQuizesStart())
     try {
-      const response = await axios.get('/quizes.json')
+       const response = await axios.get('/quiz.json')
 
       const quizes = []
 
