@@ -99,42 +99,40 @@ export function retryQuiz() {
 
 export function quizAnswerClick(answerId) {
   return (dispatch, getState) => {
-    const state = getState().quiz;
-    const question = state.quiz[state.activeQuestion];
-    // Создаём копию results, чтобы не мутировать исходное состояние
-    const results = { ...state.results };
+    const state = getState().quiz
+
+    if (state.answerState) {
+      const key = Object.keys(state.answerState)[0]
+      if (state.answerState[key] === 'success') {
+        return
+      }
+    }
+
+    const question = state.quiz[state.activeQuestion]
+    const results = state.results
 
     if (question.rightAnswerId === answerId) {
       if (!results[question.id]) {
-        results[question.id] = 'success';
+        results[question.id] = 'success'
       }
-      // Диспатчим экшен с новым объектом results
-      dispatch({
-        type: QUIZ_SET_STATE,
-        answerState: { [answerId]: 'success' },
-        results: results
-      });
 
-      // Логика перехода к следующему вопросу
-      const timeout = setTimeout(() => {
-        const isFinished = state.activeQuestion + 1 === state.quiz.length;
-        if (isFinished) {
-          dispatch({ type: FINISH_QUIZ });
+      dispatch(quizSetState({[answerId]: 'success'}, results))
+
+      const timeout = window.setTimeout(() => {
+        if (isQuizFinished(state)) {
+          dispatch(finishQuiz())
         } else {
-          dispatch({
-            type: QUIZ_NEXT_QUESTION,
-            number: state.activeQuestion + 1
-          });
+          dispatch(quizNextQuestion(state.activeQuestion + 1))
         }
-        clearTimeout(timeout);
-      }, 1000);
+        window.clearTimeout(timeout)
+      }, 1000)
     } else {
-      results[question.id] = 'error';
-      dispatch({
-        type: QUIZ_SET_STATE,
-        answerState: { [answerId]: 'error' },
-        results: results
-      });
+      results[question.id] = 'error'
+      dispatch(quizSetState({[answerId]: 'error'}, results))
     }
-  };
+  }
+}
+
+function isQuizFinished(state) {
+  return state.activeQuestion + 1 === state.quiz.length
 }

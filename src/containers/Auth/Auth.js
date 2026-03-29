@@ -1,12 +1,15 @@
 import React, { useState, useCallback } from 'react';
-import classes from './Auth.module.css'
-import Button from '../../components/UI/Button/Button'
-import Input from '../../components/UI/Input/Input'
-import is from 'is_js'
-import axios from 'axios';
+import classes from './Auth.module.css';
+import Button from '../../components/UI/Button/Button';
+import Input from '../../components/UI/Input/Input';
+import is from 'is_js';
+import { useDispatch } from 'react-redux';
+import { auth } from '../../store/actions/auth';
 
 const Auth = () => {
-  const [isFormValid, setIsFormValid] = useState(false)
+  const dispatch = useDispatch();
+  
+  const [isFormValid, setIsFormValid] = useState(false);
   const [formControls, setFormControls] = useState({
     email: {
       value: '',
@@ -32,90 +35,72 @@ const Auth = () => {
         minLength: 6
       }
     }
-  })
+  });
 
-  const loginHandler = useCallback(async () => {
-    const authData = {
-      email: formControls.email.value,
-      password: formControls.password.value,
-      returnSecureToken: true
-    };
-    try {
-      const response = await axios.post(
-        'https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=',
-        authData
-      );
-      console.log(response.data);
-    } catch (e) {
-      console.log(e);
-    }
-  }, [formControls.email.value, formControls.password.value]);
-
-  const registerHandler = useCallback(async () => {
-    const authData = {
-      email: formControls.email.value,
-      password: formControls.password.value,
-      returnSecureToken: true
-    };
-    try {
-      const response = await axios.post(
-        'https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser?key=',
-        authData
-      );
-      console.log(response.data);
-    } catch (e) {
-      console.log(e);
-    }
-  }, [formControls.email.value, formControls.password.value]);
-
-  const submitHandler = event => {
-    event.preventDefault()
-  }
-
-  const validateControl = (value, validation) => {
+  const validateControl = useCallback((value, validation) => {
     if (!validation) {
-      return true
+      return true;
     }
 
-    let isValid = true
+    let isValid = true;
 
     if (validation.required) {
-      isValid = value.trim() !== '' && isValid
+      isValid = value.trim() !== '' && isValid;
     }
 
     if (validation.email) {
-      isValid = is.email(value) && isValid
+      isValid = is.email(value) && isValid;
     }
 
     if (validation.minLength) {
-      isValid = value.length >= validation.minLength && isValid
+      isValid = value.length >= validation.minLength && isValid;
     }
 
-    return isValid
-  }
+    return isValid;
+  }, []);
 
-  const onChangeHandler = (event, controlName) => {
-    const updatedControls = { ...formControls }
-    const control = { ...updatedControls[controlName] }
+  const onChangeHandler = useCallback((event, controlName) => {
+    const updatedControls = { ...formControls };
+    const control = { ...updatedControls[controlName] };
 
-    control.value = event.target.value
-    control.touched = true
-    control.valid = validateControl(control.value, control.validation)
+    control.value = event.target.value;
+    control.touched = true;
+    control.valid = validateControl(control.value, control.validation);
 
-    updatedControls[controlName] = control
+    updatedControls[controlName] = control;
 
-    let isFormValid = true
+    let formIsValid = true;
     Object.keys(updatedControls).forEach(name => {
-      isFormValid = updatedControls[name].valid && isFormValid
-    })
+      formIsValid = updatedControls[name].valid && formIsValid;
+    });
 
-    setFormControls(updatedControls)
-    setIsFormValid(isFormValid)
-  }
+    setFormControls(updatedControls);
+    setIsFormValid(formIsValid);
+  }, [formControls, validateControl]);
 
-  const renderInputs = () => {
+  const loginHandler = useCallback(() => {
+    dispatch(auth(
+      formControls.email.value,
+      formControls.password.value,
+      true
+    ));
+  }, [dispatch, formControls.email.value, formControls.password.value]);
+
+  const registerHandler = useCallback(() => {
+    dispatch(auth(
+      formControls.email.value,
+      formControls.password.value,
+      false
+    ));
+  }, [dispatch, formControls.email.value, formControls.password.value]);
+
+  const submitHandler = useCallback((event) => {
+    event.preventDefault();
+  }, []);
+
+  const renderInputs = useCallback(() => {
     return Object.keys(formControls).map((controlName, index) => {
-      const control = formControls[controlName]
+      const control = formControls[controlName];
       return (
         <Input
           key={controlName + index}
@@ -128,9 +113,9 @@ const Auth = () => {
           errorMessage={control.errorMessage}
           onChange={event => onChangeHandler(event, controlName)}
         />
-      )
-    })
-  }
+      );
+    });
+  }, [formControls, onChangeHandler]);
 
   return (
     <div className={classes.Auth}>
@@ -158,7 +143,7 @@ const Auth = () => {
         </form>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Auth
+export default Auth;
