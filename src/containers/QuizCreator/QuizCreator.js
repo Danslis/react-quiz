@@ -1,18 +1,19 @@
-import React, { useState } from 'react'
-import classes from './QuizCreator.module.css'
-import Button from '../../components/UI/Button/Button'
-import Input from '../../components/UI/Input/Input'
-import Select from '../../components/UI/Select/Select'
-import { createControl, validate, validateForm } from '../../form/formFramework'
-import axios from '../../axios/axios-quiz'
+import React, { useState, useCallback } from 'react';
+import classes from './QuizCreator.module.css';
+import Button from '../../components/UI/Button/Button';
+import Input from '../../components/UI/Input/Input';
+import Select from '../../components/UI/Select/Select';
+import { createControl, validate, validateForm } from '../../form/formFramework';
+import { useDispatch, useSelector } from 'react-redux';
+import { createQuizQuestion, finishCreateQuiz } from '../../store/actions/create';
 
 const createOptionControl = (number) => {
   return createControl({
     label: `Вариант ${number}`,
     errorMessage: 'Значение не может быть пустым',
     id: number
-  }, { required: true })
-}
+  }, { required: true });
+};
 
 const createFormControls = () => {
   return {
@@ -24,30 +25,29 @@ const createFormControls = () => {
     option2: createOptionControl(2),
     option3: createOptionControl(3),
     option4: createOptionControl(4)
-  }
-}
+  };
+};
 
 const QuizCreator = () => {
-  const [quiz, setQuiz] = useState([])
-  const [isFormValid, setIsFormValid] = useState(false)
-  const [rightAnswerId, setRightAnswerId] = useState(1)
-  const [formControls, setFormControls] = useState(createFormControls())
+  const dispatch = useDispatch();
+  const quiz = useSelector(state => state.create.quiz);
+  
+  const [isFormValid, setIsFormValid] = useState(false);
+  const [rightAnswerId, setRightAnswerId] = useState(1);
+  const [formControls, setFormControls] = useState(createFormControls());
 
-  const submitHandler = event => {
-    event.preventDefault()
-  }
+  const submitHandler = useCallback((event) => {
+    event.preventDefault();
+  }, []);
 
-  const addQuestionHandler = event => {
-    event.preventDefault()
+  const addQuestionHandler = useCallback((event) => {
+    event.preventDefault();
 
-    const updatedQuiz = [...quiz]
-    const index = updatedQuiz.length + 1
-
-    const { question, option1, option2, option3, option4 } = formControls
+    const { question, option1, option2, option3, option4 } = formControls;
 
     const questionItem = {
       question: question.value,
-      id: index,
+      id: quiz.length + 1,
       rightAnswerId: rightAnswerId,
       answers: [
         { text: option1.value, id: option1.id },
@@ -55,59 +55,57 @@ const QuizCreator = () => {
         { text: option3.value, id: option3.id },
         { text: option4.value, id: option4.id }
       ]
-    }
+    };
 
-    updatedQuiz.push(questionItem)
+    console.log('Создан вопрос:', questionItem); // Для проверки структуры
 
-    setQuiz(updatedQuiz)
-    setIsFormValid(false)
-    setRightAnswerId(1)
-    setFormControls(createFormControls())
-  }
+    dispatch(createQuizQuestion(questionItem));
 
-  const createQuizHandler = async event => {
-    event.preventDefault()
+    setIsFormValid(false);
+    setRightAnswerId(1);
+    setFormControls(createFormControls());
+  }, [formControls, rightAnswerId, quiz.length, dispatch]);
 
-    try {
-      await axios.post('/quiz.json', quiz)
+  const createQuizHandler = useCallback((event) => {
+    event.preventDefault();
 
-      setQuiz([])
-      setIsFormValid(false)
-      setRightAnswerId(1)
-      setFormControls(createFormControls())
+    setIsFormValid(false);
+    setRightAnswerId(1);
+    setFormControls(createFormControls());
+    dispatch(finishCreateQuiz());
+  }, [dispatch]);
 
-    } catch (e) {
-      console.log(e)
-    }
-  }  
+  const changeHandler = useCallback((value, controlName) => {
+    setFormControls(prevControls => {
+      const updatedControls = { ...prevControls };
+      const control = { ...updatedControls[controlName] };
 
-  const changeHandler = (value, controlName) => {
-    const updatedControls = { ...formControls }
-    const control = { ...updatedControls[controlName] }
+      control.touched = true;
+      control.value = value;
+      control.valid = validate(control.value, control.validation);
 
-    control.touched = true
-    control.value = value
-    control.valid = validate(control.value, control.validation)
+      updatedControls[controlName] = control;
+      
+      const formIsValid = validateForm(updatedControls);
+      setIsFormValid(formIsValid);
+      
+      return updatedControls;
+    });
+  }, []);
 
-    updatedControls[controlName] = control
-
-    setFormControls(updatedControls)
-    setIsFormValid(validateForm(updatedControls))
-  }
-
-  const selectChangeHandler = event => {
-    setRightAnswerId(+event.target.value)
-  }
+  const selectChangeHandler = useCallback((event) => {
+    setRightAnswerId(+event.target.value);
+  }, []);
 
   const renderControls = () => {
     return Object.keys(formControls).map((controlName, index) => {
-      const control = formControls[controlName]
+      const control = formControls[controlName];
 
       return (
         <React.Fragment key={controlName + index}>
           <Input
             label={control.label}
-            value={control.value}
+            value={control.value || ''}
             valid={control.valid}
             shouldValidate={!!control.validation}
             touched={control.touched}
@@ -116,9 +114,9 @@ const QuizCreator = () => {
           />
           {index === 0 && <hr />}
         </React.Fragment>
-      )
-    })
-  }
+      );
+    });
+  };
 
   const select = (
     <Select
@@ -132,7 +130,7 @@ const QuizCreator = () => {
         { text: 4, value: 4 }
       ]}
     />
-  )
+  );
 
   return (
     <div className={classes.QuizCreator}>
@@ -161,7 +159,7 @@ const QuizCreator = () => {
         </form>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default QuizCreator
+export default QuizCreator;
